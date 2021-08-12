@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+set -u
+
+HUGO_PLATFORM=${HUGO_PLATFORM:-"linux/amd64"}
+
+GOLANG_IMAGE=golang:${GOLANG_VERSION}-buster
+GOLANG_HASH=$(docker buildx imagetools inspect --raw $GOLANG_IMAGE | ruby bin/inspect-remap $HUGO_PLATFORM)
+GOLANG_IMAGE="$GOLANG_IMAGE@$GOLANG_HASH"
+
+echo "GOLANG_IMAGE=$GOLANG_IMAGE"
+
+if [ "${GITHUB_ENV:-}" != "" ]; then
+    echo "GOLANG_IMAGE=$GOLANG_IMAGE" >> $GITHUB_ENV
+fi

@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+#require json
+require 'json'
+
+data = JSON.parse (ARGV.size > 0 ? STDIN.read : ARGF.read)
+
+platforms = {}
+
+data['manifests'].each do |manifest|
+  platform = manifest['platform']
+  label = "#{platform['os']}/#{platform['architecture']}#{platform.key?('variant') ? "/#{platform['variant']}" : ""}"
+
+  platforms[label] = manifest['digest']
+end
+
+if ARGV.size > 0
+  puts platforms[ARGV[0]]
+else
+  puts JSON.dump platforms
+end

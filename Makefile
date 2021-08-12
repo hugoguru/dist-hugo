@@ -5,21 +5,27 @@ enable-docker-experimental:
 clean:
 	@rm -rf src target
 
+load-vars:
+	@bin/load-vars
+
 checkout:
-	@git clone https://github.com/gohugoio/hugo.git src
+	@git clone --branch $${HUGO_BRANCH:-master} https://github.com/gohugoio/hugo.git src
+
+extract-platform:
+	@bin/extract-platform
 
 docker-pull:
-	@docker pull golang:1.16-buster
+	@docker pull $${GOLANG_IMAGE:-golang:1.16-buster}
 
 compile:
 	@docker run --rm -i \
 		-v $$(pwd):/work \
 		-w /work/src \
-		-u $$(id -u) \
+		-u $$(id -u):$$(id -g) \
 		-e GOCACHE=/tmp/.cache \
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
-		golang:1.16-buster \
+		$${GOLANG_IMAGE:-golang:1.16-buster} \
 		/work/bin/compile
 
 copy:
@@ -28,3 +34,12 @@ copy:
 package:
 	@cd target/bundle && tar -cvf ../bundle.tar *
 	@gzip -9 target/bundle.tar
+
+bump:
+	@curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name | sed "s:^v::" | tr -d '\n' > vars/HUGO_VERSION
+
+test:
+	@HUGO_BRANCH=v$$(cat vars/HUGO_VERSION) \
+	HUGO_TYPE=extended \
+	HUGO_VENDOR=test \
+	make clean checkout compile

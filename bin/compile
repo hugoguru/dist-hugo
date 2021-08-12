@@ -5,7 +5,6 @@ set -u
 
 TIMESTAMP=$(date -u -Iseconds | sed "s|+00:00|z|")
 HASH=$(git rev-parse --short HEAD)
-VENDOR="hugoguru"
 
 # Prepare `ldflags` argument
 LDFLAGS="-s -w"
@@ -27,6 +26,9 @@ export CGO_ENABLED=1
 
 # Create output folder
 mkdir -p /work/target/bundle
+
+# Platform information
+uname -a
 
 # Compile Hugo
 go build -o /work/target/bundle/hugo $TAGS -ldflags="$LDFLAGS"

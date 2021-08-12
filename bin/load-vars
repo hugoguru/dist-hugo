@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+set -u
+
+for var in $(ls vars); do
+    if [ "${GITHUB_ENV:-}" != "" ]; then
+        echo "$var=$(cat vars/$var)" >> $GITHUB_ENV
+    else 
+        echo "$var=$(cat vars/$var)"
+    fi    
+done

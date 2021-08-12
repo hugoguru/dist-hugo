@@ -18,6 +18,7 @@ jobs:
           - type: standard
             arch: amd64
             platform: linux/amd64
+
           - type: extended
             arch: amd64
             platform: linux/amd64
@@ -40,6 +41,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Load variables
+        run: make load-vars
+
+      - name: Extract platform variables
+        run: make extract-platform
+        env:
+          HUGO_PLATFORM: ${{ matrix.platform }}
 
       - name: Pull Docker image
         run: make docker-pull
@@ -69,7 +78,9 @@ jobs:
           name: hugo-${{ matrix.type }}-${{ matrix.arch }}.tar.gz
           label: Hugo ${{ matrix.type }}
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           name: hugo-${{ matrix.type }}-${{ matrix.arch }}
           path: target/bundle.tar.gz
