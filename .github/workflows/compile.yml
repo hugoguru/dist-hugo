@@ -19,9 +19,17 @@ jobs:
             arch: amd64
             platform: linux/amd64
 
+          - type: standard
+            arch: arm64
+            platform: linux/arm64/v8
+
           - type: extended
             arch: amd64
             platform: linux/amd64
+
+          - type: extended
+            arch: arm64
+            platform: linux/arm64/v8
 
     steps:
       - name: Checkout
