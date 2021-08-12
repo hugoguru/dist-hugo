@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+set -u
+
+TIMESTAMP=$(date -u -Iseconds | sed "s|+00:00|z|")
+HASH=$(git rev-parse --short HEAD)
+VENDOR="hugoguru"
+
+# Prepare `ldflags` argument
+LDFLAGS="-s -w"
+LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.buildDate=${TIMESTAMP}"
+LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.commitHash=${HASH}"
+test ! "${HUGO_VENDOR:-}" || LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.vendorInfo=${HUGO_VENDOR}"
+
+echo $LDFLAGS
+
+# Prepare tags
+TAGS=""
+TAGS="--tags extended"
+
+export CGO_ENABLED=1
+
+# Create output folder
+mkdir -p /work/target/bundle
+
+# Compile Hugo
+go build -o /work/target/bundle/hugo $TAGS -ldflags="$LDFLAGS"
+
+# Run Hugo
+/work/target/bundle/hugo version

@@ -8,14 +8,22 @@ clean:
 checkout:
 	@git clone https://github.com/gohugoio/hugo.git src
 
-build:
+docker-pull:
+	@docker pull golang:1.16-buster
+
+compile:
 	@docker run --rm -i \
 		-v $$(pwd):/work \
 		-w /work/src \
 		-u $$(id -u) \
 		-e GOCACHE=/tmp/.cache \
+		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		golang:1.16-buster \
-		/work/bin/build
+		/work/bin/compile
 
 copy:
 	@cp src/LICENSE src/README.md target/bundle/
+
+package:
+	@cd target/bundle && tar -cvf ../bundle.tar *
+	@gzip -9 target/bundle.tar
