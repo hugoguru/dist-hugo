@@ -1,0 +1,13 @@
+#!/bin/sh
+
+HASH=$(git rev-parse --short HEAD)
+TIMESTAMP=$(date -u -Iseconds | sed "s|+00:00|z|")
+
+mkdir -p /work/target/bundle
+
+LDFLAGS="-s -w"
+LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.buildDate=$TIMESTAMP"
+LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.commitHash=$HASH"
+LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.vendorInfo=hugoguru"
+
+CGO_ENABLED=1 go build -o /work/target/bundle/hugo --tags extended -ldflags="$LDFLAGS"
