@@ -18,6 +18,7 @@ compile:
 		-u $$(id -u) \
 		-e GOCACHE=/tmp/.cache \
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
+		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
 		golang:1.16-buster \
 		/work/bin/compile
 

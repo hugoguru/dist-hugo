@@ -15,8 +15,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - type: standard
+            arch: amd64
+            platform: linux/amd64
           - type: extended
-            arch: linux/arm64
+            arch: amd64
+            platform: linux/amd64
 
     steps:
       - name: Checkout
@@ -46,6 +50,7 @@ jobs:
       - name: Compile
         run: make compile
         env:
+          HUGO_TYPE: ${{ matrix.type }}
           HUGO_VENDOR: ${{ github.actor }}
 
       - name: Copy resources
@@ -61,10 +66,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: target/bundle.tar.gz
-          name: "ehf-postaward-g3-site-${TAG}.zip"
-          label: Bundle
+          name: hugo-${{ matrix.type }}-${{ matrix.arch }}.tar.gz
+          label: Hugo ${{ matrix.type }}
 
       - uses: actions/upload-artifact@v2
         with:
-          name: bundle
+          name: hugo-${{ matrix.type }}-${{ matrix.arch }}
           path: target/bundle.tar.gz

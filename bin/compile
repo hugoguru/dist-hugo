@@ -13,11 +13,15 @@ LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.buildDate=${TIMESTAMP}
 LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.commitHash=${HASH}"
 test ! "${HUGO_VENDOR:-}" || LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.vendorInfo=${HUGO_VENDOR}"
 
-echo $LDFLAGS
-
 # Prepare tags
-TAGS=""
-TAGS="--tags extended"
+if [ "$HUGO_TYPE" = "standard" ]; then
+    TAGS=""
+elif [ "$HUGO_TYPE" = "extended" ]; then
+    TAGS="--tags extended"
+else
+    echo "Unknown Hugo type"
+    exit 1
+fi
 
 export CGO_ENABLED=1
 
