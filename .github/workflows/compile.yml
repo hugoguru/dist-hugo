@@ -20,7 +20,7 @@ jobs:
             platform: linux/amd64
 
           - type: standard
-            arch: arm64
+            arch: aarch64
             platform: linux/arm64/v8
 
           - type: extended
@@ -28,7 +28,7 @@ jobs:
             platform: linux/amd64
 
           - type: extended
-            arch: arm64
+            arch: aarch64
             platform: linux/arm64/v8
 
     steps:
