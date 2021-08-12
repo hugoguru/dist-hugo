@@ -9,7 +9,7 @@ checkout:
 	@git clone https://github.com/gohugoio/hugo.git src
 
 build:
-	@docker run --rm -it \
+	@docker run --rm -i \
 		-v $$(pwd):/work \
 		-w /work/src \
 		-u $$(id -u) \
