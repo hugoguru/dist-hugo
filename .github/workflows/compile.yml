@@ -1,9 +1,9 @@
-name: Docker build
+name: Compile
 
 on:
   push:
     branches:
-      - master
+      - main
   release:
     types:
       - released
