@@ -19,27 +19,21 @@ jobs:
       matrix:
         include:
           - type: standard
-            arch: x86_64
             platform: linux/amd64
 
           - type: standard
-            arch: arm7l
             platform: linux/arm/v7
 
           - type: standard
-            arch: aarch64
             platform: linux/arm64/v8
 
           - type: extended
-            arch: x86_64
             platform: linux/amd64
 
           - type: extended
-            arch: arm7l
             platform: linux/arm/v7
 
           - type: extended
-            arch: aarch64
             platform: linux/arm64/v8
 
     steps:
@@ -65,7 +59,6 @@ jobs:
         run: make load-vars
         env:
           LOAD_HUGO_TYPE: ${{ matrix.type }}
-          LOAD_HUGO_ARCH: ${{ matrix.arch }}
 
       - name: Extract platform variables
         run: make extract-platform
@@ -74,6 +67,9 @@ jobs:
 
       - name: Pull Docker image
         run: make docker-pull
+
+      - name: Load arch identifier
+        run: make arch
 
       - name: Fetch Hugo source
         run: make checkout
@@ -101,21 +97,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ env.TARGET_BUNDLE }}
-          name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ matrix.arch }}.tar.gz
-          label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (Linux ${{ matrix.arch }})
+          name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ env.HUGO_ARCH }}.tar.gz
+          label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (Linux ${{ env.HUGO_ARCH }})
 
       - name: Upload bundle (artifact)
         uses: actions/upload-artifact@v2
-        if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           path: ${{ env.TARGET_BUNDLE }}
-          name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ matrix.arch }}
+          name: hugo-${{ env.HUGO_VERSION }}-dist
+          retention-days: 5
 
       - name: Upload checksum (artifact)
         uses: actions/upload-artifact@v2
         with:
-          path: ${{ env.TARGET_CHECKSUM }}
-          name: checksums.sha256
+          path: target/checksums/*
+          name: checksums
 
 
   checksums:
@@ -123,6 +119,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: compile
     
+    strategy:
+      matrix:
+        alg:
+          - sha256
+          - sha512
+
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -133,11 +135,13 @@ jobs:
       - name: Download checksums
         uses: actions/download-artifact@v2
         with:
-          name: checksums.sha256
+          name: checksums
           path: checksums
       
       - name: Geneate checksums file
         run: make generate-checksums
+        env:
+          CHECKSUM_ALG: ${{ matrix.alg }}
 
       - name: Upload checksums (release)
         uses: klakegg/github-upload@v0.9.1
@@ -146,12 +150,33 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ env.TARGET_CHECKSUMS }}
-          name: hugo-${{ env.HUGO_VERSION }}-checksums.txt
-          label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha256)
+          name: hugo-${{ env.HUGO_VERSION }}-checksums-${{ matrix.alg }}.txt
+          label: Hugo ${{ env.HUGO_VERSION }}, checksums (${{ matrix.alg }})
 
       - name: Upload checksums (artifacs)
         uses: actions/upload-artifact@v2
-        if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           path: ${{ env.TARGET_CHECKSUMS }}
-          name: hugo-${{ env.HUGO_VERSION }}-checksums
+          name: hugo-${{ env.HUGO_VERSION }}-dist
+          retention-days: 3
+
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    needs: checksums
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Load variables
+        run: make load-vars
+        
+      - name: Download checksums
+        uses: actions/download-artifact@v2
+        with:
+          name: hugo-${{ env.HUGO_VERSION }}-dist
+          path: dist
+
+      - name: Verify distribution
+        run: make verify

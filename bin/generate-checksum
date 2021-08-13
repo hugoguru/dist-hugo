@@ -3,10 +3,9 @@
 set -e
 set -u
 
-target=target/hugo-${HUGO_TYPE}-${HUGO_VERSION}-${HUGO_ARCH}.tar.gz.sha256
+target=target/checksums/$(basename $TARGET_BUNDLE)
 
-sha256sum ${TARGET_BUNDLE} | cut -d " " -f 1 > $target
+mkdir -p $(dirname $target)
 
-if [ "${GITHUB_ENV:-}" != "" ]; then
-    echo "TARGET_CHECKSUM=$target" >> $GITHUB_ENV
-fi
+sha256sum ${TARGET_BUNDLE} | cut -d " " -f 1 > $target.sha256
+sha512sum ${TARGET_BUNDLE} | cut -d " " -f 1 > $target.sha512

@@ -3,15 +3,15 @@
 set -e
 set -u
 
-target=target/hugo-${HUGO_VERSION}-checksums.txt
+target=target/hugo-${HUGO_VERSION}-checksums-${CHECKSUM_ALG}.txt
 
 mkdir -p target
 
 test ! -e $target || rm $target
 
-for f in $(ls checksums); do
-    filename=$(echo $f | sed "s:\.sha256$::")
-    digest=$(cat checksums/$f)
+for f in $(ls checksums/*.${CHECKSUM_ALG}); do
+    filename=$(basename $f | sed "s:\.${CHECKSUM_ALG}$::")
+    digest=$(cat $f)
 
     echo "$digest  $filename" >> $target 
 done

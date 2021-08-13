@@ -12,26 +12,15 @@ LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.buildDate=${TIMESTAMP}
 LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.commitHash=${HASH}"
 test ! "${HUGO_VENDOR:-}" || LDFLAGS="$LDFLAGS -X github.com/gohugoio/hugo/common/hugo.vendorInfo=${HUGO_VENDOR}"
 
-# Prepare tags
-if [ "$HUGO_TYPE" = "standard" ]; then
-    TAGS=""
-elif [ "$HUGO_TYPE" = "extended" ]; then
-    TAGS="--tags extended"
-else
-    echo "Unknown Hugo type"
-    exit 1
-fi
-
-export CGO_ENABLED=1
+# Platform information
+uname -a
 
 # Create output folder
 mkdir -p /work/target/bundle
 
-# Platform information
-uname -a
-
 # Compile Hugo
-go build -o /work/target/bundle/hugo $TAGS -ldflags="$LDFLAGS"
+export CGO_ENABLED=1
+go build -o /work/target/bundle/hugo --tags extended -ldflags="$LDFLAGS"
 
 # Run Hugo
 /work/target/bundle/hugo version

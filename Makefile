@@ -17,6 +17,11 @@ extract-platform:
 docker-pull:
 	@docker pull $${GOLANG_IMAGE:-golang:1.16-buster}
 
+arch:
+	@alg=$$(docker run --rm -i \
+		$${GOLANG_IMAGE:-golang:1.16-buster} \
+		uname -m) && echo "HUGO_ARCH=$${alg}" >> $$GITHUB_ENV
+
 compile:
 	@docker run --rm -i \
 		-v $$(pwd):/work \
@@ -26,7 +31,7 @@ compile:
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
 		$${GOLANG_IMAGE:-golang:1.16-buster} \
-		/work/bin/compile
+		/work/bin/compile-$${HUGO_TYPE}
 
 copy:
 	@cp src/LICENSE src/README.md target/bundle/
@@ -56,3 +61,6 @@ test:
 	HUGO_TYPE=extended \
 	HUGO_VENDOR=test \
 	make clean checkout compile
+
+verify:
+	@bin/verify
