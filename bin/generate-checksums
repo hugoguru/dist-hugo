@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+set -u
+
+target=target/hugo_${HUGO_VERSION}_checksums.txt
+
+mkdir -p target
+
+test ! -e $target || rm $target
+
+for f in $(ls checksums); do
+    filename=$(echo $f | sed "s:\.sha256$::")
+    digest=$(cat checksums/$f)
+
+    echo "$digest  $filename" >> $target 
+done
+
+if [ "${GITHUB_ENV:-}" != "" ]; then
+    echo "TARGET_CHECKSUMS=$target" >> $GITHUB_ENV
+fi

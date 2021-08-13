@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+set -u
+
+target=target/hugo_${HUGO_TYPE}_${HUGO_VERSION}_${HUGO_ARCH}.tar.gz.sha256
+
+sha256sum ${TARGET_BUNDLE} | cut -d " " -f 1 > $target
+
+if [ "${GITHUB_ENV:-}" != "" ]; then
+    echo "TARGET_CHECKSUM=$target" >> $GITHUB_ENV
+fi

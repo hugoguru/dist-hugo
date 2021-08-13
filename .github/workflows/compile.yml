@@ -55,6 +55,9 @@ jobs:
 
       - name: Load variables
         run: make load-vars
+        env:
+          LOAD_HUGO_TYPE: ${{ matrix.type }}
+          LOAD_HUGO_ARCH: ${{ matrix.arch }}
 
       - name: Extract platform variables
         run: make extract-platform
@@ -72,7 +75,6 @@ jobs:
       - name: Compile
         run: make compile
         env:
-          HUGO_TYPE: ${{ matrix.type }}
           HUGO_VENDOR: ${{ github.repository_owner }}
 
       - name: Copy resources
@@ -81,31 +83,31 @@ jobs:
       - name: Create tar.gz
         run: make package
 
-      - name: Create checksum
-        run: sha256sum target/bundle.tar.gz | cut -d " " -f 1 > target/hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}.tar.gz.sha256
+      - name: Generate checksum
+        run: make generate-checksum
 
-      - name: Upload package
+      - name: Upload bundle (release)
         uses: klakegg/github-upload@v0.9.1
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: target/bundle.tar.gz
+          file: ${{ env.TARGET_BUNDLE }}
           name: hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}.tar.gz
           label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (${{ matrix.arch }})
 
-      - name: Upload artifact (bundle)
+      - name: Upload bundle (artifact)
         uses: actions/upload-artifact@v2
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
+          path: ${{ env.TARGET_BUNDLE }}
           name: hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}
-          path: target/bundle.tar.gz
 
-      - name: Upload artifact (checksum)
+      - name: Upload checksum (artifact)
         uses: actions/upload-artifact@v2
         with:
+          path: ${{ env.TARGET_CHECKSUM }}
           name: checksums.sha256
-          path: target/hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}.tar.gz.sha256
 
 
   checksums:
@@ -114,11 +116,34 @@ jobs:
     needs: compile
     
     steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Load variables
+        run: make load-vars
+        
       - name: Download checksums
         uses: actions/download-artifact@v2
         with:
           name: checksums.sha256
           path: checksums
       
-      - name: List content
-        run: ls -l checksums
+      - name: Geneate checksums file
+        run: make generate-checksums
+
+      - name: Upload checksums (release)
+        uses: klakegg/github-upload@v0.9.1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: ${{ env.TARGET_CHECKSUMS }}
+          name: hugo_${{ env.HUGO_VERSION }}_checksums.txt
+          label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha256)
+
+      - name: Upload checksums (artifacs)
+        uses: actions/upload-artifact@v2
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        with:
+          path: ${{ env.TARGET_CHECKSUMS }}
+          name: hugo_${{ env.HUGO_VERSION }}_checksums

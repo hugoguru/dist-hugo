@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+set -u
+
+basename="hugo_${HUGO_TYPE}_${HUGO_VERSION}_${HUGO_ARCH}"
+
+cd target/bundle && tar -cvf ../$basename.tar * && cd ../..
+
+gzip -9 target/$basename.tar
+
+if [ "${GITHUB_ENV:-}" != "" ]; then
+    echo "TARGET_BUNDLE=target/$basename.tar.gz" >> $GITHUB_ENV
+fi
