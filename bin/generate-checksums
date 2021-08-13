@@ -3,7 +3,7 @@
 set -e
 set -u
 
-target=target/hugo_${HUGO_VERSION}_checksums.txt
+target=target/hugo-${HUGO_VERSION}-checksums.txt
 
 mkdir -p target
 

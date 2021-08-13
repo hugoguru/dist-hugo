@@ -19,27 +19,27 @@ jobs:
       matrix:
         include:
           - type: standard
-            arch: amd64
+            arch: x86_64
             platform: linux/amd64
 
           - type: standard
-            arch: aarch
+            arch: arm7l
             platform: linux/arm/v7
 
           - type: standard
-            arch: arm64
+            arch: aarch64
             platform: linux/arm64/v8
 
           - type: extended
-            arch: amd64
+            arch: x86_64
             platform: linux/amd64
 
           - type: extended
-            arch: aarch
+            arch: arm7l
             platform: linux/arm/v7
 
           - type: extended
-            arch: arm64
+            arch: aarch64
             platform: linux/arm64/v8
 
     steps:
@@ -101,15 +101,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ env.TARGET_BUNDLE }}
-          name: hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}.tar.gz
-          label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (${{ matrix.arch }})
+          name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ matrix.arch }}.tar.gz
+          label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (Linux ${{ matrix.arch }})
 
       - name: Upload bundle (artifact)
         uses: actions/upload-artifact@v2
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           path: ${{ env.TARGET_BUNDLE }}
-          name: hugo_${{ matrix.type }}_${{ env.HUGO_VERSION }}_${{ matrix.arch }}
+          name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ matrix.arch }}
 
       - name: Upload checksum (artifact)
         uses: actions/upload-artifact@v2
@@ -146,7 +146,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ env.TARGET_CHECKSUMS }}
-          name: hugo_${{ env.HUGO_VERSION }}_checksums.txt
+          name: hugo-${{ env.HUGO_VERSION }}-checksums.txt
           label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha256)
 
       - name: Upload checksums (artifacs)
@@ -154,4 +154,4 @@ jobs:
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           path: ${{ env.TARGET_CHECKSUMS }}
-          name: hugo_${{ env.HUGO_VERSION }}_checksums
+          name: hugo-${{ env.HUGO_VERSION }}-checksums

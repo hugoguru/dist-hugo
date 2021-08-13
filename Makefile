@@ -43,6 +43,14 @@ generate-checksums:
 bump:
 	@curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name | sed "s:^v::" | tr -d '\n' > vars/HUGO_VERSION
 
+commit:
+	@git commit -a -m "Version $$(cat vars/HUGO_VERSION)"
+	@git push origin main
+
+tag:
+	@git tag -a v$$(cat vars/HUGO_VERSION)
+	@git push origin v$$(cat vars/HUGO_VERSION)
+
 test:
 	@HUGO_BRANCH=v$$(cat vars/HUGO_VERSION) \
 	HUGO_TYPE=extended \

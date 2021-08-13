@@ -3,7 +3,7 @@
 set -e
 set -u
 
-basename="hugo_${HUGO_TYPE}_${HUGO_VERSION}_${HUGO_ARCH}"
+basename="hugo-${HUGO_TYPE}-${HUGO_VERSION}-linux-${HUGO_ARCH}"
 
 cd target/bundle && tar -cvf ../$basename.tar * && cd ../..
 
