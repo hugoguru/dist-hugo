@@ -23,7 +23,11 @@ jobs:
             platform: linux/amd64
 
           - type: standard
-            arch: aarch64
+            arch: aarch
+            platform: linux/arm/v7
+
+          - type: standard
+            arch: arm64
             platform: linux/arm64/v8
 
           - type: extended
@@ -31,7 +35,11 @@ jobs:
             platform: linux/amd64
 
           - type: extended
-            arch: aarch64
+            arch: aarch
+            platform: linux/arm/v7
+
+          - type: extended
+            arch: arm64
             platform: linux/arm64/v8
 
     steps:
@@ -111,7 +119,7 @@ jobs:
 
 
   checksums:
-    name: Checksum file
+    name: Checksums file
     runs-on: ubuntu-latest
     needs: compile
     
