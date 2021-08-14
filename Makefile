@@ -36,14 +36,8 @@ compile:
 copy:
 	@cp src/LICENSE src/README.md target/bundle/
 
-package:
+package-bundle:
 	@bin/package-bundle
-
-generate-checksum:
-	@bin/generate-checksum
-
-generate-checksums:
-	@bin/generate-checksums
 
 bump:
 	@curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | jq -r .tag_name | sed "s:^v::" | tr -d '\n' > vars/HUGO_VERSION
@@ -61,6 +55,3 @@ test:
 	HUGO_TYPE=extended \
 	HUGO_VENDOR=test \
 	make clean checkout compile
-
-verify:
-	@bin/verify

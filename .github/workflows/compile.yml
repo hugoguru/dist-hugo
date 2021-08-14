@@ -85,10 +85,7 @@ jobs:
         run: make copy
 
       - name: Create tar.gz
-        run: make package
-
-      - name: Generate checksum
-        run: make generate-checksum
+        run: make package-bundle
 
       - name: Upload bundle (release)
         uses: klakegg/github-upload@v0.9.1
@@ -107,23 +104,17 @@ jobs:
           name: hugo-${{ env.HUGO_VERSION }}-dist
           retention-days: 5
 
-      - name: Upload checksum (artifact)
-        uses: actions/upload-artifact@v2
-        with:
-          path: target/checksums/*
-          name: checksums
-
 
   checksums:
-    name: Checksums file
+    name: Checksum file (sha)
     runs-on: ubuntu-latest
     needs: compile
     
     strategy:
       matrix:
         alg:
-          - sha256
-          - sha512
+          - 256
+          - 512
 
     steps:
       - name: Checkout
@@ -131,17 +122,19 @@ jobs:
 
       - name: Load variables
         run: make load-vars
-        
-      - name: Download checksums
+        env:
+          LOAD_TARGET_CHECKSUMS: target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
+
+      - name: Download dist
         uses: actions/download-artifact@v2
         with:
-          name: checksums
-          path: checksums
-      
-      - name: Geneate checksums file
-        run: make generate-checksums
-        env:
-          CHECKSUM_ALG: ${{ matrix.alg }}
+          name: hugo-${{ env.HUGO_VERSION }}-dist
+          path: dist
+
+      - name: Generate checksums
+        run: |
+          mkdir $(dirname $TARGET_CHECKSUMS)
+          cd dist && shasum -a ${{ matrix.alg }} * > ../$TARGET_CHECKSUMS
 
       - name: Upload checksums (release)
         uses: klakegg/github-upload@v0.9.1
@@ -150,8 +143,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ env.TARGET_CHECKSUMS }}
-          name: hugo-${{ env.HUGO_VERSION }}-checksums-${{ matrix.alg }}.txt
-          label: Hugo ${{ env.HUGO_VERSION }}, checksums (${{ matrix.alg }})
+          label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha${{ matrix.alg }})
 
       - name: Upload checksums (artifacs)
         uses: actions/upload-artifact@v2
@@ -159,24 +151,3 @@ jobs:
           path: ${{ env.TARGET_CHECKSUMS }}
           name: hugo-${{ env.HUGO_VERSION }}-dist
           retention-days: 3
-
-  verify:
-    name: Verify
-    runs-on: ubuntu-latest
-    needs: checksums
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Load variables
-        run: make load-vars
-        
-      - name: Download checksums
-        uses: actions/download-artifact@v2
-        with:
-          name: hugo-${{ env.HUGO_VERSION }}-dist
-          path: dist
-
-      - name: Verify distribution
-        run: make verify
