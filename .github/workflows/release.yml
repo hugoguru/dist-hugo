@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  detect:
+    name: Detect
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Load variables
+        run: make load-vars
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: main
+          tag: v${{ env.HUGO_VERSION }}
