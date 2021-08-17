@@ -1,0 +1,32 @@
+name: Detect release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  detect:
+    name: Detect
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Fetch latest release
+        id: source
+        uses: k15g/action-github-latest-release@edge
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          owner: gohugoio
+          repo: hugo
+
+      - name: Write to vars
+        run: echo -n "${{  steps.source.outputs.version }}" > vars/HUGO_VERSION
+
+      - name: Commit and push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
