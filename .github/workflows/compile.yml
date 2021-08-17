@@ -2,11 +2,14 @@ name: Compile
 
 on:
   push:
+    paths-ignore:
+      - ".github/**"
     branches:
       - main
   release:
     types:
       - released
+  workflow_dispatch:
 
 jobs:
   compile:
