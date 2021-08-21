@@ -5,9 +5,6 @@ enable-docker-experimental:
 clean:
 	@rm -rf src target
 
-load-vars:
-	@bin/load-vars
-
 checkout:
 	@git clone --branch $${HUGO_BRANCH:-master} https://github.com/gohugoio/hugo.git src
 

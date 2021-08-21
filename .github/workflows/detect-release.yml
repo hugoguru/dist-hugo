@@ -12,14 +12,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Fetch latest release
+      - name: Fetch latest release of Hugo
         id: source
-        uses: k15g/action-github-latest-release@edge
+        uses: k15g/action-github-release-info@edge
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           owner: gohugoio
