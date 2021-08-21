@@ -26,7 +26,7 @@ jobs:
           repo: hugo
 
       - name: Write to vars
-        run: echo -n "${{  steps.source.outputs.version }}" > vars/HUGO_VERSION
+        run: echo -n "${{  steps.source.outputs.version }}" > .env/HUGO_VERSION
 
       - name: Commit and push potential changes
         uses: actions-js/push@master

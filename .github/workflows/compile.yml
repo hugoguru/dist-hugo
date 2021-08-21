@@ -3,7 +3,10 @@ name: Compile
 on:
   push:
     paths-ignore:
-      - ".github/**"
+      - .github/**
+      - .gitignore
+      - LICENSE
+      - README.md
     branches:
       - main
   release:
@@ -58,10 +61,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Load variables
-        run: make load-vars
-        env:
-          LOAD_HUGO_TYPE: ${{ matrix.type }}
+      - name: Load environment variables
+        uses: k15g/action-load-env@edge
+        with:
+          extras: |
+            HUGO_TYPE=${{ matrix.type }}
 
       - name: Extract platform variables
         run: make extract-platform
@@ -105,7 +109,7 @@ jobs:
         with:
           path: ${{ env.TARGET_BUNDLE }}
           name: hugo-${{ env.HUGO_VERSION }}-dist
-          retention-days: 5
+          retention-days: 3
 
 
   checksums:
@@ -123,8 +127,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Load variables
-        run: make load-vars
+      - name: Load environment variables
+        uses: k15g/action-load-env@edge
 
       - name: Download dist
         uses: actions/download-artifact@v2

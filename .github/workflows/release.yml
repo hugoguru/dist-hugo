@@ -15,8 +15,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Load variables
-        run: make load-vars
+      - name: Load environment variables
+        uses: k15g/action-load-env@edge
 
       - name: Create release
         uses: ncipollo/release-action@v1
