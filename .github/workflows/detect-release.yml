@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch latest release of Hugo
-        uses: k15g/action-github-release-info@edge
+        uses: k15g/action-github-release-info@v1
         timeout-minutes: 1
         continue-on-error: true
         id: source
@@ -28,12 +28,12 @@ jobs:
           repo: hugo
 
       - name: Write to vars
-        if: steps.source.outputs.version
+        if: steps.source.conclusion == 'success'
         run: echo -n "${{  steps.source.outputs.version }}" > .env/HUGO_VERSION
 
       - name: Commit and push potential changes
         uses: actions-js/push@master
-        if: steps.source.outputs.version
+        if: steps.source.conclusion == 'success'
         with:
           message: Hugo version ${{ steps.source.outputs.version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
