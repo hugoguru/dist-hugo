@@ -19,11 +19,9 @@ jobs:
 
       - name: Fetch latest release of Hugo
         uses: k15g/action-github-release-info@v1
-        timeout-minutes: 1
         continue-on-error: true
         id: source
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           owner: gohugoio
           repo: hugo
 
@@ -36,5 +34,7 @@ jobs:
         if: steps.source.conclusion == 'success'
         with:
           message: Hugo version ${{ steps.source.outputs.version }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.BOT_TOKEN }}
           branch: main
+          author_name: ${{ secrets.BOT_USERNAME }}
+          author_email: ${{ secrets.BOT_EMAIL }}
