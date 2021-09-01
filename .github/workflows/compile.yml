@@ -95,11 +95,10 @@ jobs:
         run: make package-bundle
 
       - name: Upload bundle (release)
-        uses: klakegg/github-upload@v0.9.1
+        uses: k15g/action-github-asset-upload@v1
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.TARGET_BUNDLE }}
           name: hugo-${{ matrix.type }}-${{ env.HUGO_VERSION }}-linux-${{ env.HUGO_ARCH }}.tar.gz
           label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (Linux ${{ env.HUGO_ARCH }})
@@ -130,6 +129,12 @@ jobs:
       - name: Load environment variables
         uses: k15g/action-load-env@edge
 
+      - name: Load environment variables
+        uses: k15g/action-load-env@edge
+        with:
+          extras: |
+            TARGET_CHECKSUMS=target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
+
       - name: Download dist
         uses: actions/download-artifact@v2
         with:
@@ -137,26 +142,20 @@ jobs:
           path: dist
 
       - name: Generate checksums
-        env:
-          TARGET_CHECKSUMS: target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
         run: |
           mkdir -p $(dirname $TARGET_CHECKSUMS)
           cd dist && shasum -a ${{ matrix.alg }} * > ../$TARGET_CHECKSUMS
 
       - name: Upload checksums (release)
-        uses: klakegg/github-upload@v0.9.1
+        uses: k15g/action-github-asset-upload@v1
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_CHECKSUMS: target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.TARGET_CHECKSUMS }}
           label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha${{ matrix.alg }})
 
       - name: Upload checksums (artifacs)
         uses: actions/upload-artifact@v2
-        env:
-          TARGET_CHECKSUMS: target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
         with:
           path: ${{ env.TARGET_CHECKSUMS }}
           name: hugo-${{ env.HUGO_VERSION }}-dist
