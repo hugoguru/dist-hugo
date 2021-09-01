@@ -16,11 +16,11 @@ jobs:
           fetch-depth: 0
 
       - name: Load environment variables
-        uses: k15g/action-load-env@edge
+        uses: k15g/action-load-env@v1
 
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
           commit: main
           tag: v${{ env.HUGO_VERSION }}
