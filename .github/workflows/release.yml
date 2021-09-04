@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  detect:
-    name: Detect
+  release:
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
