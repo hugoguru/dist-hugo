@@ -19,7 +19,7 @@ uname -a
 mkdir -p /work/target/bundle
 
 # Compile Hugo
-go build -o /work/target/bundle/hugo -ldflags="$LDFLAGS"
+CGO_ENABLED=0 go build -o /work/target/bundle/hugo -ldflags="$LDFLAGS"
 
 # Run Hugo
 /work/target/bundle/hugo version
