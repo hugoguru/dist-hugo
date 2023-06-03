@@ -20,7 +20,5 @@ mkdir -p /work/target/bundle
 
 # Compile Hugo
 export CGO_ENABLED=1
+export GOOS=linux
 go build -o /work/target/bundle/hugo --tags extended -ldflags="$LDFLAGS"
-
-# Run Hugo
-/work/target/bundle/hugo version

@@ -19,7 +19,6 @@ uname -a
 mkdir -p /work/target/bundle
 
 # Compile Hugo
-CGO_ENABLED=0 go build -o /work/target/bundle/hugo -ldflags="$LDFLAGS"
-
-# Run Hugo
-/work/target/bundle/hugo version
+export CGO_ENABLED=0
+export GOOS=linux
+go build -o /work/target/bundle/hugo -ldflags="$LDFLAGS"

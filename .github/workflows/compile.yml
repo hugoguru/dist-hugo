@@ -26,25 +26,37 @@ jobs:
         include:
           - type: standard
             platform: linux/amd64
+            arch: x86_64
+            goarch: amd64
 
           - type: standard
             platform: linux/arm/v7
+            arch: armv7l
+            goarch: arm
 
           - type: standard
             platform: linux/arm64/v8
+            arch: aarch64
+            goarch: arm64
 
           - type: extended
             platform: linux/amd64
+            arch: x86_64
+            goarch: amd64
 
           - type: extended
             platform: linux/arm/v7
+            arch: armv7l
+            goarch: arm
 
           - type: extended
             platform: linux/arm64/v8
+            arch: aarch64
+            goarch: arm64
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -66,6 +78,7 @@ jobs:
         with:
           extras: |
             HUGO_TYPE=${{ matrix.type }}
+            HUGO_ARCH=${{ matrix.arch }}
 
       - name: Extract platform variables
         run: make extract-platform
@@ -75,18 +88,19 @@ jobs:
       - name: Pull Docker image
         run: make docker-pull
 
-      - name: Load arch identifier
-        run: make arch
-
       - name: Fetch Hugo source
         run: make checkout
         env:
           HUGO_BRANCH: v${{ env.HUGO_VERSION }}
 
       - name: Compile
-        run: make compile
+        run: make compile-${{ matrix.type }}
         env:
           HUGO_VENDOR: ${{ github.repository_owner }}
+          GOARCH: ${{ matrix.goarch }}
+
+      - name: Verify
+        run: make verify
 
       - name: Copy resources
         run: make copy
@@ -104,7 +118,7 @@ jobs:
           label: Hugo ${{ env.HUGO_VERSION }}, ${{ matrix.type }} edition (Linux ${{ env.HUGO_ARCH }})
 
       - name: Upload bundle (artifact)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ${{ env.TARGET_BUNDLE }}
           name: hugo-${{ env.HUGO_VERSION }}-dist
@@ -123,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Load environment variables
         uses: k15g/action-load-env@edge
@@ -135,7 +149,7 @@ jobs:
             TARGET_CHECKSUMS=target/hugo-${{ env.HUGO_VERSION }}-checksums-sha${{ matrix.alg }}.txt
 
       - name: Download dist
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: hugo-${{ env.HUGO_VERSION }}-dist
           path: dist
@@ -154,7 +168,7 @@ jobs:
           label: Hugo ${{ env.HUGO_VERSION }}, checksums (sha${{ matrix.alg }})
 
       - name: Upload checksums (artifacs)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ${{ env.TARGET_CHECKSUMS }}
           name: hugo-${{ env.HUGO_VERSION }}-dist
@@ -170,7 +184,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
           fetch-depth: 0

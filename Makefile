@@ -12,23 +12,39 @@ extract-platform:
 	@bin/extract-platform
 
 docker-pull:
+	@docker pull $${GOLANG_COMPILE_IMAGE:-golang:1.16-buster}
 	@docker pull $${GOLANG_IMAGE:-golang:1.16-buster}
 
-arch:
-	@alg=$$(docker run --rm -i \
-		$${GOLANG_IMAGE:-golang:1.16-buster} \
-		uname -m) && echo "HUGO_ARCH=$${alg}" >> $$GITHUB_ENV
-
-compile:
-	@docker run --rm -i \
+compile-standard:
+	docker run --rm -i \
 		-v $$(pwd):/work \
 		-w /work/src \
 		-u $$(id -u):$$(id -g) \
 		-e GOCACHE=/tmp/.cache \
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
-		$${GOLANG_IMAGE:-golang:1.16-buster} \
-		/work/bin/compile-$${HUGO_TYPE}
+		-e GOARCH="$${GOARCH:-arm64}" \
+		$${GOLANG_COMPILE_IMAGE:-golang:1.20.1-buster} \
+		/work/bin/compile-standard
+
+compile-extended:
+	docker run --rm -i \
+		-v $$(pwd):/work \
+		-w /work/src \
+		-u $$(id -u):$$(id -g) \
+		-e GOCACHE=/tmp/.cache \
+		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
+		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
+		-e GOARCH="$${GOARCH:-arm64}" \
+		$${GOLANG_IMAGE:-golang:1.20.1-buster} \
+		/work/bin/compile-extended
+
+verify:
+	@docker run --rm -i \
+		-v $$(pwd):/work \
+		-w /work/src \
+		$${GOLANG_IMAGE:-golang:1.20.1-buster} \
+		/work/target/bundle/hugo version
 
 copy:
 	@cp src/LICENSE src/README.md target/bundle/
@@ -51,4 +67,4 @@ test:
 	@HUGO_BRANCH=v$$(cat vars/HUGO_VERSION) \
 	HUGO_TYPE=extended \
 	HUGO_VENDOR=test \
-	make clean checkout compile
+	make clean checkout compile verify
