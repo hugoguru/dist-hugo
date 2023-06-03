@@ -12,7 +12,6 @@ extract-platform:
 	@bin/extract-platform
 
 docker-pull:
-	@docker pull $${GOLANG_COMPILE_IMAGE:-golang:1.16-buster}
 	@docker pull $${GOLANG_IMAGE:-golang:1.16-buster}
 
 compile-standard:
@@ -24,7 +23,7 @@ compile-standard:
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
 		-e GOARCH="$${GOARCH:-arm64}" \
-		$${GOLANG_COMPILE_IMAGE:-golang:1.20.1-buster} \
+		$${GOLANG_IMAGE:-golang:1.20.4-buster} \
 		/work/bin/compile-standard
 
 compile-extended:
@@ -36,14 +35,14 @@ compile-extended:
 		-e HUGO_VENDOR="$${HUGO_VENDOR:-}" \
 		-e HUGO_TYPE="$${HUGO_TYPE:-standard}" \
 		-e GOARCH="$${GOARCH:-arm64}" \
-		$${GOLANG_IMAGE:-golang:1.20.1-buster} \
+		$${GOLANG_IMAGE:-golang:1.20.4-buster} \
 		/work/bin/compile-extended
 
 verify:
 	@docker run --rm -i \
 		-v $$(pwd):/work \
 		-w /work/src \
-		$${GOLANG_IMAGE:-golang:1.20.1-buster} \
+		$${GOLANG_IMAGE:-golang:1.20.4-buster} \
 		/work/target/bundle/hugo version
 
 copy:

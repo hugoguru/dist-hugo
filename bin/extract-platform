@@ -13,5 +13,4 @@ echo "GOLANG_IMAGE=$GOLANG_IMAGE"
 
 if [ "${GITHUB_ENV:-}" != "" ]; then
     echo "GOLANG_IMAGE=$GOLANG_IMAGE" >> $GITHUB_ENV
-    echo "GOLANG_COMPILE_IMAGE=golang:${GOLANG_VERSION}-buster" >> $GITHUB_ENV
 fi
